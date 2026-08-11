@@ -1,0 +1,729 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>訂購單</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7f4;
+      --panel: #ffffff;
+      --text: #1f2933;
+      --muted: #65707d;
+      --line: #d9e0dc;
+      --accent: #236c62;
+      --accent-dark: #174d46;
+      --danger: #a33b3b;
+      --soft: #eef7f5;
+      --shadow: 0 18px 48px rgba(31, 41, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        linear-gradient(135deg, rgba(35, 108, 98, 0.11), transparent 38%),
+        linear-gradient(315deg, rgba(195, 94, 67, 0.10), transparent 34%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      width: min(100% - 32px, 1100px);
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    .form-shell {
+      overflow: hidden;
+      border: 1px solid rgba(217, 224, 220, 0.9);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .form-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 28px clamp(20px, 4vw, 40px);
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfb;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      min-width: 96px;
+      padding: 8px 12px;
+      border: 1px solid #bdd4cf;
+      border-radius: 999px;
+      color: var(--accent-dark);
+      background: var(--soft);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    form {
+      padding: clamp(20px, 4vw, 40px);
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 22px 20px;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #34404a;
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid #cbd5d1;
+      border-radius: 6px;
+      padding: 12px 14px;
+      color: var(--text);
+      background: #ffffff;
+      font: inherit;
+      line-height: 1.45;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(35, 108, 98, 0.14);
+      outline: none;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #8a949e;
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    textarea {
+      min-height: 104px;
+      resize: vertical;
+    }
+
+    .hint {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.4;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 1.16rem;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .line-items {
+      display: grid;
+      gap: 10px;
+    }
+
+    .line-header,
+    .line-row {
+      display: grid;
+      grid-template-columns: 56px minmax(220px, 1.5fr) minmax(112px, 0.55fr) minmax(112px, 0.55fr) minmax(190px, 1fr);
+      gap: 10px;
+      align-items: center;
+    }
+
+    .line-header {
+      padding: 0 8px;
+      color: #52606d;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .line-row {
+      padding: 10px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+    }
+
+    .line-number {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      color: var(--accent-dark);
+      background: var(--soft);
+      font-weight: 800;
+    }
+
+    .line-row input {
+      min-height: 42px;
+      padding: 9px 11px;
+    }
+
+    .mobile-label {
+      display: none;
+      margin-bottom: 6px;
+      color: #52606d;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .order-note {
+      margin-top: 24px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .actions button {
+      min-height: 46px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 11px 18px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.14s ease;
+    }
+
+    .actions button:active {
+      transform: translateY(1px);
+    }
+
+    .secondary {
+      border-color: #cbd5d1;
+      color: #394650;
+      background: #ffffff;
+    }
+
+    .primary {
+      color: #ffffff;
+      background: var(--accent);
+      box-shadow: 0 10px 22px rgba(35, 108, 98, 0.22);
+    }
+
+    .primary:hover {
+      background: var(--accent-dark);
+    }
+
+    .required {
+      color: var(--danger);
+    }
+
+    @media (max-width: 900px) {
+      .line-header {
+        display: none;
+      }
+
+      .line-row {
+        grid-template-columns: 44px 1fr 1fr;
+        align-items: start;
+      }
+
+      .line-row .item-field,
+      .line-row .note-field {
+        grid-column: 2 / -1;
+      }
+
+      .mobile-label {
+        display: block;
+      }
+    }
+
+    @media (max-width: 720px) {
+      main {
+        width: min(100% - 20px, 620px);
+        padding: 20px 0;
+      }
+
+      .form-header,
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .tag {
+        min-width: 0;
+      }
+
+      .top-grid,
+      .line-row {
+        grid-template-columns: 1fr;
+      }
+
+      .line-row .item-field,
+      .line-row .note-field {
+        grid-column: auto;
+      }
+
+      .line-number {
+        width: 100%;
+        justify-content: start;
+        padding: 0 12px;
+        place-items: center start;
+      }
+
+      .actions {
+        flex-direction: column-reverse;
+      }
+
+      .actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="form-shell" aria-labelledby="form-title">
+      <header class="form-header">
+        <h1 id="form-title">訂購單</h1>
+        <div class="tag">Order Form</div>
+      </header>
+
+      <form>
+        <div class="top-grid">
+          <div class="field">
+            <label for="customer">客戶 <span class="required" aria-hidden="true">*</span></label>
+            <input id="customer" name="customer" type="text" list="customerOptions" autocomplete="off" required placeholder="輸入關鍵字搜尋客戶">
+            <datalist id="customerOptions"></datalist>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>訂購明細</h2>
+          <span>品項可輸入關鍵字並從下拉建議帶入</span>
+        </div>
+
+        <div class="line-items" aria-label="訂購明細">
+          <div class="line-header" aria-hidden="true">
+            <span>項次</span>
+            <span>品項</span>
+            <span>訂購數量</span>
+            <span>贈送數量</span>
+            <span>備註</span>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">1</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[1][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[1][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[1][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[1][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">2</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[2][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[2][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[2][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[2][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">3</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[3][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[3][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[3][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[3][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">4</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[4][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[4][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[4][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[4][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">5</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[5][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[5][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[5][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[5][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">6</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[6][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[6][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[6][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[6][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">7</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[7][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[7][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[7][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[7][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">8</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[8][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[8][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[8][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[8][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">9</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[9][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[9][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[9][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[9][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+
+          <div class="line-row">
+            <div class="line-number">10</div>
+            <div class="item-field">
+              <span class="mobile-label">品項</span>
+              <input name="items[10][name]" type="text" list="itemOptions" autocomplete="off" placeholder="輸入品項關鍵字">
+            </div>
+            <div>
+              <span class="mobile-label">訂購數量</span>
+              <input name="items[10][orderQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div>
+              <span class="mobile-label">贈送數量</span>
+              <input name="items[10][giftQty]" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            </div>
+            <div class="note-field">
+              <span class="mobile-label">備註</span>
+              <input name="items[10][note]" type="text" placeholder="輸入備註">
+            </div>
+          </div>
+        </div>
+
+        <datalist id="itemOptions"></datalist>
+
+        <div class="field order-note">
+          <label for="orderNote">訂單備註</label>
+          <textarea id="orderNote" name="orderNote" placeholder="請輸入訂單備註"></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="secondary" type="reset">清除</button>
+          <button class="primary" type="submit">送出訂購單</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const customers = [
+      { name: "好好藥局", address: "台北市中山區南京東路100號", taxId: "12345678", phone: "02-2345-6789", note: "王小明負責" },
+      { name: "啄木鳥藥局", address: "新北市板橋區文化路88號", taxId: "23456789", phone: "02-3456-7890", note: "王小明負責" },
+      { name: "新高橋桃園站前", address: "桃園市中壢區中央西路66號", taxId: "34567890", phone: "03-456-7890", note: "王小明負責" },
+      { name: "新高橋高雄博愛", address: "台中市西區公益路168號", taxId: "45678901", phone: "04-2345-6789", note: "陳怡君負責" },
+      { name: "新高橋楠梓", address: "高雄市苓雅區三多二路99號", taxId: "56789012", phone: "07-345-6789", note: "陳怡君負責" }
+    ];
+
+    const items = [
+      { name: "經典原味餅乾", code: "BIS-001" },
+      { name: "巧克力夾心餅乾", code: "BIS-002" },
+      { name: "蜂蜜燕麥棒", code: "BAR-101" },
+      { name: "綜合堅果禮盒", code: "NUT-201" },
+      { name: "冷泡茶包", code: "TEA-301" },
+      { name: "濾掛咖啡", code: "COF-401" },
+      { name: "水果軟糖", code: "CAN-501" },
+      { name: "海鹽洋芋片", code: "CHP-601" },
+     {name:"健立明(賜立康)膠囊",code:"CAL1"},
+{name:"黑納豆激脢軟膠囊",code:"CBN"},
+{name:"黑納豆激脢軟膠囊",code:"CBN2"},
+{name:"黑納豆激脢軟膠囊",code:"CBN5"},
+{name:"保美婷植物性荷爾蒙",code:"CBO"},
+{name:"蓓思特Ⅱ代",code:"CBS1"},
+{name:"強力鈣補軟膠囊",code:"CCB"},
+{name:"強力鈣補軟膠囊",code:"CCB1"},
+{name:"杜使平膠囊",code:"CDO"},
+{name:"風濕痛膠囊Soma-300",code:"CFT"},
+{name:"風濕痛Soma-300",code:"CFT1"},
+{name:"勁鈣12合1",code:"CGO"},
+{name:"勁鈣12合1",code:"CGO1"},
+{name:"強力-勁鈣軟膠囊",code:"CGS"},
+{name:"強力-勁鈣軟膠囊",code:"CGS1"},
+{name:"強力-勁鈣軟膠囊",code:"CGS2"},
+{name:"金清膠囊",code:"CGD1"},
+{name:"金清膠囊",code:"CGD"},
+{name:"骨維康膠囊",code:"CGLU"},
+{name:"活雪通膠囊",code:"CHT"},
+{name:"活雪通膠囊",code:"CHT1"},
+{name:"強力鈣強10合1",code:"CJC"},
+{name:"強力鈣強10合1",code:"CJC2"},
+{name:"勁鈣16合一",code:"CJE"},
+{name:"勁鈣16合一",code:"CJE1"},
+{name:"速倍旺軟膠囊",code:"CSB"},
+{name:"速倍旺軟膠囊",code:"CSB1"},
+{name:"強力保聖寧膠囊",code:"CSP1"},
+{name:"賜爾鼻好膠囊",code:"CSU"},
+{name:"瀉痢止錠",code:"CLR"},
+{name:"通雪絡膠囊",code:"CTS"},
+{name:"通雪絡膠囊",code:"CTS1"},
+{name:"活力鈣軟膠囊",code:"CVC"},
+{name:"活力鈣軟膠囊",code:"CVC1"},
+{name:"美日E右旋E膠囊",code:"CVI2"},
+{name:"萬嗽安膠囊",code:"CWO12"},
+{name:"萬嗽安膠囊",code:"CWO14"},
+{name:"強力威又康膠囊高單位綜合維他命",code:"CYK1"},
+{name:"維持液",code:"GOD"},
+{name:"維持液",code:"GOD3"},
+{name:"德國水解膠原蛋白",code:"GOY"},
+{name:"德國膠原300g",code:"GOY2"},
+{name:"康膚乳膏200磺胺密啶銀",code:"OAC1"},
+{name:"一條根酸痛軟膏軟管",code:"OAH"},
+{name:"金牌一條根酸痛膏",code:"OAS"},
+{name:"金牌一條根酸痛膏",code:"OAS1"},
+{name:"金牌老薑一條根軟膏",code:"OAS2"},
+{name:"金牌老薑一條根軟膏",code:"OAS3"},
+{name:"千手活力遠紅外線藥布",code:"OCH"},
+{name:"金絲萬應膏加味水織藥布",code:"OCS4"},
+{name:"金牌一條根貼布",code:"OGC"},
+{name:"金牌老薑一條根貼布",code:"OGC1"},
+{name:"金門金牌飛龍掌血精油貼布",code:"OFN"},
+{name:"金門金牌飛龍掌血精油乳霜",code:"OFN8"},
+{name:"金門金牌飛龍掌血精油乳霜",code:"OFN4"},
+{name:"行血青草膏",code:"OGRE"},
+{name:"黛菲兒薰衣草水漾調理霜",code:"OHA2"},
+{name:"行血萬應膏",code:"OHS2"},
+{name:"行血萬應膏",code:"OHS4"},
+{name:"治芭凝膠",code:"OJB"},
+{name:"飛龍掌血精油滾珠瓶",code:"SFN4"},
+{name:"飛龍掌血一條根噴劑",code:"SFN12"},
+{name:"金牌一條根噴劑",code:"SGA"},
+{name:"金牌老薑一條根噴劑",code:"SGA2"},
+{name:"金牌一條根精油",code:"SGL"},
+{name:"金牌老薑一條根精油",code:"SGL2"},
+{name:"強欣99口服液",code:"SGS"},
+{name:"草本金得舒噴劑",code:"SHG"},
+{name:"勁鈣葡萄糖胺液",code:"SJG"},
+{name:"蚊別防蚊液",code:"SKI"},
+{name:"蜂膠枇杷露",code:"SLH2"},
+{name:"樂寶補精",code:"SLP"},
+{name:"第二代樂寶補精補精氣",code:"SLP8"},
+{name:"胃喜因懸浮液",code:"SOE"},
+{name:"活樂B",code:"TBM"},
+{name:"活樂B",code:"TBM1"},
+{name:"蟲必克錠",code:"TCB4"},
+{name:"喜美C+E+Ca",code:"TCC3"},
+{name:"感熱安錠",code:"TCM1"},
+{name:"感熱安",code:"TCM2"},
+{name:"吉循暢膜衣錠9.6公絲白果配醣體",code:"TGN1"},
+{name:"喉伴口含錠",code:"THB1"},
+{name:"活力B2加強錠",code:"THL"},
+{name:"活力B2加強錠",code:"THL1"},
+{name:"活力B2加強錠",code:"THL2"},
+{name:"伊百芬錠 600mg",code:"TIP"},
+{name:"益普消",code:"TIR"},
+{name:"爽咳錠",code:"TSC"},
+{name:"雪中紅",code:"TSJ"},
+{name:"瀉樂舒錠",code:"TSL"},
+{name:"瀉樂舒",code:"TSL1"},
+{name:"元氣寧強效錠",code:"TSR"},
+{name:"元氣寧加強錠",code:"TSR2"},
+{name:"胃勇安錠",code:"TWY"},
+{name:"胃勇安錠",code:"TWY2"},
+{name:"胃勇安錠",code:"TWY3"},
+{name:"勇_99錠",code:"TYO"},
+{name:"活力元氣",code:"TVP"},
+{name:"活力元氣",code:"TVP1"},
+
+    ];
+
+    const customerOptions = document.querySelector("#customerOptions");
+    const itemOptions = document.querySelector("#itemOptions");
+
+    function updateCustomerOptions() {
+      customerOptions.innerHTML = "";
+      customers.forEach((customer) => {
+        const option = document.createElement("option");
+        option.value = customer.name;
+        option.label = [customer.phone, customer.address].filter(Boolean).join(" / ");
+        customerOptions.append(option);
+      });
+    }
+
+    function updateItemOptions() {
+      itemOptions.innerHTML = "";
+      items.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        option.label = item.code;
+        itemOptions.append(option);
+      });
+    }
+
+    updateCustomerOptions();
+    updateItemOptions();
+  </script>
+</body>
+</html>
